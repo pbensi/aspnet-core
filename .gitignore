@@ -3,6 +3,12 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/main/VisualStudio.gitignore
 
+# Ignore logs.txt
+aspnet-core/Web.Host/App_Data/logs.txt
+
+# Ignore OS-specific files
+.DS_Store
+
 # User-specific files
 *.rsuser
 *.suo

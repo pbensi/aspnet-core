@@ -1,0 +1,8 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="en">
+    <texts>
+        <text name="Welcome" value="hello {0}, great to have you" />
+        <text name="HomePage" value="Home Page" />
+        <text name="DashBoard" value="Dash Board" />
+    </texts>
+</localizationDictionary>
