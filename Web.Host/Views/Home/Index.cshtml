@@ -1,0 +1,88 @@
+﻿@model SwaggerSignInModel
+
+@{
+    ViewData["Title"] = "SignIn";
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6">
+            <div class="card">
+                <div class="card-header bg-dark">
+                    <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">
+                        <img src="./swagger.svg" height="30" alt="swagger" />
+                    </a>
+                </div>
+                <form id="signInForm">
+                    <div class="card-body">
+                        <div class="d-flex flex-column">
+                            <div class="form-group mb-3 position-relative">
+                                <input id="userName" name="userName" class="form-control" required placeholder=" " />
+                                <label for="userName" class="form-label">User Name</label>
+                            </div>
+                            <div class="form-group position-relative">
+                                <input id="password" name="Password" type="password" autocomplete="off" class="form-control" required placeholder=" " />
+                                <label for="password" class="form-label">Password</label>
+                            </div>
+                      </div>
+                    </div>
+                    <div class="card-footer">
+                        <div class="d-flex flex-column">
+                            <button type="submit" class="btn btn-primary" id="signInButton">Sign In</button>
+                            <div id="errorMessage" role="alert"></div>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', function () {
+
+        const signInForm = document.querySelector('#signInForm');
+        const userNameInput = document.querySelector('#userName');
+        const passwordInput = document.querySelector('#password');
+
+        userNameInput.addEventListener('input', clearErrorMessage);
+        passwordInput.addEventListener('input', clearErrorMessage);
+
+        signInForm.addEventListener('submit', async function (event) {
+            event.preventDefault();
+
+            const errorMessage = document.querySelector('#errorMessage');
+
+            const encryptionService = new EncryptionService();
+            const signatureService = new SignatureService();
+            const apiService = new ApiService();
+
+            const keyPair = await signatureService.generateKeyPair();
+            const aesKey = await encryptionService.generateAesKey();
+
+            const signInData = {
+                userName: userNameInput.value,
+                password: passwordInput.value
+            };
+
+            const encryptedData = await encryptionService.encryptData(aesKey, JSON.stringify(signInData));
+            const signature = await signatureService.signData(keyPair.privateKey, encryptedData.ciphertext);
+            const publicKey = await signatureService.exportPublicKey(keyPair.publicKey);
+            const exportedAesKey = await encryptionService.exportAesKey(aesKey);
+
+            const result = await apiService.signIn(encryptedData, signature, publicKey, exportedAesKey);
+
+            if (result.isSuccess) {
+                window.location.replace(result.redirectUrl);
+            } else {
+                errorMessage.innerHTML = result.message;
+                errorMessage.className = "alert alert-danger mt-2 d-block";
+            }
+        });
+
+        function clearErrorMessage() {
+            const errorMessageDiv = document.querySelector('#errorMessage');
+            errorMessage.className = "alert alert-danger mt-2 d-none";
+        }
+    });
+</script>

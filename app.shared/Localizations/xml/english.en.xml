@@ -1,0 +1,54 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="en">
+	<texts>
+		<text name="Permission" value="Permission denied does not have the required role for {0} operation."/>
+		<text name="Request" value="Request method or permission name is missing."/>
+		<text name="UserNotFound" value="User not found or is inactive."/>
+		<text name="NoDataFound" value="No Data Found"/>
+		<text name="UserDeleteSuccessfully" value="User deleted successfully."/>
+		<text name="NoCancel" value="No, cancel!"/>
+		<text name="YesDeleteIt" value="Yes, delete it!"/>
+		<text name="YouWontBeAbleToRevertThis" value="You won't be able to revert this!"/>
+		<text name="AreYouSure" value="Are you sure?"/>
+		<text name="EditUser" value="Edit User"/>
+		<text name="Showing" value="Showing {0} to {1} rows"/>
+		<text name="Page" value="Page {0} of {1}, Total rows {2} rows"/>
+		<text name="Rows" value="Rows" />
+		<text name="PermissionRequiredOrInactiveUser" value="{0} Permission required or user is inactive"/>
+		<text name="InvalidFieldValue" value="Invalid field value" />
+		<text name="MaximumLength" value="Maximum length exceeded {0} characters maximum" />
+		<text name="MinimumLength" value="Minimum length should be {0} characters" />
+		<text name="InvalidEmailFormat" value="Invalid email format. Must contain '@' symbol" />
+		<text name="ThisFieldIsRequired" value="This field is required" />
+		<text name="Failed" value="Failed" />
+		<text name="Error" value="Error" />
+		<text name="Success" value="Success" />
+		<text name="Warning" value="Warning" />
+		<text name="AdminUser" value="Admin User" />
+		<text name="ActiveUser" value="Active User" />
+		<text name="Email" value="Email" />
+		<text name="CanView" value="Can View" />
+		<text name="CanAdd" value="Can Add" />
+		<text name="CanUpdate" value="Can Update" />
+		<text name="CanRemove" value="Can Remove" />
+		<text name="PagesName" value="Pages Name" />
+		<text name="Roles" value="Roles" />
+		<text name="SaveChanges" value="Save Changes" />
+		<text name="Edit" value="Edit" />
+		<text name="Delete" value="Delete" />
+		<text name="Close" value="Close" />
+		<text name="SignIn" value="SignIn" />
+		<text name="Password" value="Password" />
+		<text name="UserName" value="User Name" />
+		<text name="ChangePassword" value="Change Password" />
+		<text name="Logout" value="Logout" />
+		<text name="Search" value="Search" />
+		<text name="Create" value="Create" />
+		<text name="Users" value="Users" />
+		<text name="FirstName" value="First Name" />
+		<text name="LastName" value="Last Name" />
+		<text name="CreateUser" value="Create User" />
+		<text name="HomePage" value="Home Page" />
+		<text name="DashBoard" value="Dash Board" />
+	</texts>
+</localizationDictionary>

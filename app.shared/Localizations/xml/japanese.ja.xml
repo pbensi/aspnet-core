@@ -1,0 +1,53 @@
+﻿<?xml version="1.0" encoding="utf-8" ?>
+<localizationDictionary culture="ja">
+	<texts>
+		<text name="Permission" value="権限 {0} には、{0} 操作に必要な役割がありません。"/>
+		<text name="Request" value="リクエストメソッドまたは権限名がありません。"/>
+		<text name="UserNotFound" value="ユーザーが見つからないか、非アクティブです"/>
+		<text name="NoDataFound" value="データが見つかりません"/>
+		<text name="NoCancel" value="いいえ、キャンセルしてください！"/>
+		<text name="YesDeleteIt" value="はい、削除してください!"/>
+		<text name="YouWontBeAbleToRevertThis" value="これを元に戻すことはできません。"/>
+		<text name="AreYouSure" value="本気ですか?"/>
+		<text name="EditUser" value="ユーザーの編集"/>
+		<text name="Showing" value="Showing {0} to {1} rows"/>
+		<text name="Page" value="Page {0} of {1}, Total rows {2} rows"/>
+		<text name="Rows" value="行" />
+		<text name="PermissionRequiredOrInactiveUser" value="{0} 権限が必要か、ユーザーが非アクティブです"/>
+		<text name="InvalidFieldValue" value="無効なフィールド値" />
+		<text name="MaximumLength" value="最大長が最大 {0} 文字を超えました" />
+		<text name="MinimumLength" value="最小長は {0} 文字である必要があります。" />
+		<text name="InvalidEmailFormat" value="無効な電子メール形式です。 「@」記号を含める必要があります。" />
+		<text name="ThisFieldIsRequired" value="この項目は必須です" />
+		<text name="Failed" value="失敗した" />
+		<text name="Error" value="エラー" />
+		<text name="Success" value="成功" />
+		<text name="Warning" value="警告" />
+		<text name="AdminUser" value="管理者ユーザー" />
+		<text name="ActiveUser" value="アクティブユーザー" />
+		<text name="Email" value="Eメール" />
+		<text name="CanView" value="見ることができます" />
+		<text name="CanAdd" value="追加可能" />
+		<text name="CanUpdate" value="更新可能" />
+		<text name="CanRemove" value="取り外し可能" />
+		<text name="PagesName" value="ページ名" />
+		<text name="Roles" value="役割" />
+		<text name="SaveChanges" value="変更内容を保存" />
+		<text name="Edit" value="編集" />
+		<text name="Delete" value="消去" />
+		<text name="Close" value="近い" />
+		<text name="Login" value="ログイン" />
+		<text name="Password" value="パスワード" />
+		<text name="UserName" value="ユーザー名" />
+		<text name="ChangePassword" value="パスワードを変更する" />
+		<text name="Logout" value="ログアウト" />
+		<text name="Search" value="検索" />
+		<text name="Create" value="作成する" />
+		<text name="Users" value="ユーザー" />
+		<text name="FirstName" value="ファーストネーム" />
+		<text name="LastName" value="苗字" />
+		<text name="CreateUser" value="ユーザーを作成" />
+		<text name="HomePage" value="ホームページ" />
+		<text name="DashBoard" value="ダッシュボード" />
+	</texts>
+</localizationDictionary>

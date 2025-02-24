@@ -1,8 +1,0 @@
-﻿<?xml version="1.0" encoding="utf-8" ?>
-<localizationDictionary culture="ja">
-    <texts>
-        <text name="Welcome" value="いらっしゃいませ {0}, あなたがいてよかった" />
-        <text name="HomePage" value="ホームページ" />
-        <text name="DashBoard" value="ダッシュボード" />
-    </texts>
-</localizationDictionary>

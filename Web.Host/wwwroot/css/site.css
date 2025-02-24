@@ -20,3 +20,25 @@ html {
 body {
   margin-bottom: 60px;
 }
+
+    .form-group label {
+        position: absolute;
+        display: block;
+        background: white;
+        font-size: small;
+        top: 8px;
+        left: 10px;
+        color: #888;
+        transition: all 0.2s ease;
+    }
+
+    .form-group input:focus + label,
+    .form-group input:not(:placeholder-shown) + label {
+        top: -10px; 
+        color: #0d6efd;
+    }
+
+    .form-group input:not(:focus):placeholder-shown + label,
+    .form-group input:not(:focus):not(:placeholder-shown) + label {
+        color: #888;
+    }

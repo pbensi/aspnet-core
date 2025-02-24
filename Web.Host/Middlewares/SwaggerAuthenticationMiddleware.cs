@@ -1,76 +1,73 @@
-﻿using api.shared.Utilities;
-using System.Text;
+﻿using app.migrator.Contexts;
+using Web.Host.HttpContexts;
+using Web.Host.Models;
 
 namespace Web.Host.Middlewares
 {
-    public sealed class SwaggerAuthenticationMiddleware
+    internal sealed class SwaggerAuthenticationMiddleware
     {
         private readonly RequestDelegate _next;
-        private readonly TimeSpan _inactiveTimeout = TimeSpan.FromMinutes(2);
 
         public SwaggerAuthenticationMiddleware(RequestDelegate next)
         {
             _next = next;
         }
 
-        public async Task InvokeAsync(HttpContext context)
+        public async Task InvokeAsync(HttpContext httpContext,
+            RequestContext requestContext)
         {
-            var token = context.Session.GetString("token");
-
-            var lastActivityTimeString = context.Session.GetString("LastActivityTime");
-            DateTime lastActivityTime;
-
-            if (string.IsNullOrEmpty(lastActivityTimeString)
-                || !DateTime.TryParse(lastActivityTimeString, out lastActivityTime))
+            switch (requestContext.AllowedRole)
             {
-                lastActivityTime = DateTime.UtcNow;
-                context.Session.SetString("LastActivityTime", lastActivityTime.ToString());
-            }
+                case AllowedRole.Client:
+                    //
+                    break;
+                case AllowedRole.Server:
+                    bool isSigninRequest = httpContext.Request.Path.StartsWithSegments(UrlResources.RootUrl, StringComparison.OrdinalIgnoreCase) ||
+                                                           httpContext.Request.Path.StartsWithSegments(UrlResources.HomeUrl, StringComparison.OrdinalIgnoreCase);
+                    bool isSwaggerRequest = httpContext.Request.Path.StartsWithSegments(UrlResources.SwaggerUrl, StringComparison.OrdinalIgnoreCase);
+                    bool isApiRequest = httpContext.Request.Path.StartsWithSegments(UrlResources.APIUrl, StringComparison.OrdinalIgnoreCase);
+                    bool isAccountActive = requestContext.UserGuid != Guid.Empty;
 
-            var currentTime = DateTime.UtcNow;
-            var timeSinceLastActivity = currentTime - lastActivityTime;
-
-            if (timeSinceLastActivity > _inactiveTimeout)
-            {
-                token = null;
-                context.Session.SetString("token", string.Empty);
-            }
-
-            context.Session.SetString("LastActivityTime", currentTime.ToString());
-            
-            if (!string.IsNullOrEmpty(token))
-            {
-                AES aes = new AES();
-
-                string decryptData = aes.DecryptData(token, Token.Key);
-
-                if (decryptData.Equals(Token.UserId))
-                {
-                    if ((context.Request.Path.StartsWithSegments("/")
-                    || context.Request.Path.StartsWithSegments("/login"))
-                    && !string.IsNullOrEmpty(token))
+                    bool isRedirectToRootUrl = (isSwaggerRequest && !isSigninRequest && !isAccountActive);
+                    if (isRedirectToRootUrl)
                     {
-                        context.Response.Redirect("/swagger");
+                        httpContext.Response.Redirect(UrlResources.RootUrl, true);
                         return;
                     }
-                }
+
+                    bool isRedirectToSwaggerUrl = (!isSwaggerRequest  && isSigninRequest && isAccountActive);
+                    if (isRedirectToSwaggerUrl)
+                    {
+                        httpContext.Response.Redirect(UrlResources.SwaggerUrl, true);
+                        return;
+                    }
+
+                    bool isRedirectToPageNotFound = (!isApiRequest && !isSigninRequest  && !isAccountActive);
+                    if (isRedirectToPageNotFound)
+                    {
+                        httpContext.Response.ContentType = "text/html";
+                        await httpContext.Response.SendFileAsync(UrlResources.PageNotFound);
+                        return;
+                    }
+
+                    //bool isSessionExpired = (isApiRequest && !isAccountActive);
+                    //if (isSessionExpired)
+                    //{
+                    //    httpContext.Response.Redirect(UrlResources.RootUrl, true);
+                    //    return;
+                    //}
+
+                    break;
+                case AllowedRole.None:
+                    httpContext.Response.StatusCode = StatusCodes.Status400BadRequest;
+                    await httpContext.Response.WriteAsJsonAsync(new ResponseModel
+                    {
+                        Message = $"Invalid Access Role: {requestContext.AllowedRole}. Access Role should be one of the defined roles (Client, Server)",
+                    });
+                    return;
             }
 
-            if ((context.Request.Path.StartsWithSegments("/swagger")
-                || IsSwaggerRequest(context.Request.Headers))
-                && string.IsNullOrEmpty(token))
-            {
-                context.Session.Remove("token");
-                context.Response.Redirect("/login");
-                return;
-            }
-
-            await _next(context);
-        }
-
-        private bool IsSwaggerRequest(IHeaderDictionary headers)
-        {
-            return headers.ContainsKey("Referer") && headers["Referer"].ToString().Contains("/swagger");
+            await _next(httpContext);
         }
     }
 }
