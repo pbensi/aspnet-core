@@ -13,7 +13,7 @@ namespace app.shared
             {
                 var jwtTokenConfig = new
                 {
-                    SecretKey = SecurityUtils.PublicDecrypt(EnvironmentManager.SECRET_KEY),
+                    SecretKey = EnvironmentManager.SECRET_KEY,
                     Issuer = EnvironmentManager.ISSUER,
                     Audience = EnvironmentManager.AUDIENCE,
                     Claims = claims,
@@ -45,7 +45,7 @@ namespace app.shared
             {
                 var jwtTokenConfig = new
                 {
-                    SecretKey = SecurityUtils.PublicDecrypt(EnvironmentManager.SECRET_KEY),
+                    SecretKey = EnvironmentManager.SECRET_KEY,
                     Issuer = EnvironmentManager.ISSUER,
                     Audience = EnvironmentManager.AUDIENCE
                 };

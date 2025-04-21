@@ -1,12 +1,12 @@
-using app.migrator.Contexts;
 using app.presentations;
 using app.services;
 using app.shared;
-using Microsoft.EntityFrameworkCore;
 using Serilog;
 using Serilog.Events;
 using Web.Host;
 using Web.Host.Extensions;
+
+Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", EnvironmentManager.HOSTING_ENVIRONMENT);
 
 var builder = WebApplication.CreateBuilder(args);
 

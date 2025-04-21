@@ -59,8 +59,6 @@ namespace Web.Host.Extensions
 
         public static void AddJwtAuthentication(this IServiceCollection services)
         {
-            string secret = SecurityUtils.PublicDecrypt(EnvironmentManager.SECRET_KEY);
-
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -77,7 +75,7 @@ namespace Web.Host.Extensions
 
                     ValidIssuer = EnvironmentManager.ISSUER,
                     ValidAudience = EnvironmentManager.AUDIENCE,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(EnvironmentManager.SECRET_KEY))
                 };
             });
 
@@ -135,13 +133,11 @@ namespace Web.Host.Extensions
         public static void AddConnectionAndHealthChecks(this IServiceCollection services)
         {
             string sql = EnvironmentManager.SQL_AUTHENTICATION;
-
-            string decryptConnectionString = SecurityUtils.PublicDecrypt(sql);
             services.AddHealthChecks()
-                .AddCheck("database", new SQLHealthCheck(decryptConnectionString));
+                .AddCheck("database", new SQLHealthCheck(sql));
 
             services.AddDbContext<DatabaseContext>(options =>
-                options.UseSqlServer(decryptConnectionString));
+                options.UseSqlServer(sql));
         }
 
         public static void AddInterfaceManager(this IServiceCollection services)

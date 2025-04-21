@@ -59,8 +59,6 @@ namespace Web.Host.Middlewares
                 return;
             }
 
-            //Guid userGuid = JwtToken.GetUserGuidWithValidateJwtToken(accountUserGuid);
-
             Guid.TryParse(accountUserGuid, out Guid userGuid);
             requestContext.UserGuid = userGuid;
             requestContext.PageName = pageName;

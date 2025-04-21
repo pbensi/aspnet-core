@@ -1,6 +1,7 @@
-﻿using Newtonsoft.Json;
+﻿using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using Newtonsoft.Json;
 
 namespace app.shared
 {
@@ -11,8 +12,9 @@ namespace app.shared
             public string Salt { get; set; } = string.Empty;
             public string IV { get; set; } = string.Empty;
             public string CipherText { get; set; } = string.Empty;
-            public string DeploymentEnvironment { get; set; } = string.Empty;
+            public string HostingEnvironment { get; set; } = string.Empty;
             public string ExpirationTimestamp { get; set; } = string.Empty;
+            public string TargetEnvironment { get;set; } = string.Empty;
             public string Key { get; set; } = string.Empty;
         }
 
@@ -21,7 +23,14 @@ namespace app.shared
             public string CipherText { get; set; } = string.Empty;
         }
 
-        private enum DeploymentEnvironment
+        private class AppSettings
+        {
+            public string Name { get; set; } = string.Empty;
+            public string Meta { get; set; } = string.Empty;
+            public string Secret { get; set; } = string.Empty;
+        }
+
+        private enum HostingEnvironment
         {
             Development = 1,
             Production = 2
@@ -36,9 +45,8 @@ namespace app.shared
         public static string CORS_SERVER_ORIGINS => GetSecretEnvironmentVariable("CORS_SERVER_ORIGINS");
         public static string ISSUER => GetSecretEnvironmentVariable("ISSUER");
         public static string AUDIENCE => GetSecretEnvironmentVariable("AUDIENCE");
-        public static string WEBHOST_SECRET_NAME => GetEnvironmentVariable("WEBHOST_SECRET_NAME");
-        public static string WEBHOST_SECRETDATA_FILE_PATH => GetEnvironmentVariable("WEBHOST_SECRETDATA_FILE_PATH");
-        public static string WEBHOST_METADATA_FILE_PATH => GetEnvironmentVariable("WEBHOST_METADATA_FILE_PATH");
+        public static string HOSTING_ENVIRONMENT => GetSecretEnvironmentVariable("HOSTING_ENVIRONMENT");
+        public static string WEBHOST_FILES => GetEnvironmentVariable("WEBHOST_FILES");
 
         private static string GetEnvironmentVariable(string variable)
         {
@@ -53,11 +61,27 @@ namespace app.shared
 
         public static string GetSecretEnvironmentVariable(string variable)
         {
-            string secretName = WEBHOST_SECRET_NAME;
-            string secretFilePath = WEBHOST_SECRETDATA_FILE_PATH;
-            string metadataFilePath = WEBHOST_METADATA_FILE_PATH;
+            if (!Directory.Exists(WEBHOST_FILES))
+            {
+                throw new InvalidOperationException($"The specified directory '{WEBHOST_FILES}' does not exist. Please check the path.");
+            }
 
-            string metadataJson = File.ReadAllText(metadataFilePath);
+            string hostName = Dns.GetHostName();
+            string appSettingPath = Path.Combine(WEBHOST_FILES, $"app-{hostName}-settings.json");
+
+            if (!File.Exists(appSettingPath))
+            {
+                throw new FileNotFoundException($"The app settings file '{appSettingPath}' was not found. Please ensure it exists.");
+            }
+
+            string appSettingJson = File.ReadAllText(appSettingPath);
+            AppSettings appSettings = JsonConvert.DeserializeObject<AppSettings>(appSettingJson) ?? throw new InvalidOperationException("Failed to deserialize Settings.");
+
+            string secretName = appSettings.Name;
+            string metaDataFilePath = appSettings.Meta;
+            string secretFilePath = appSettings.Secret;
+
+            string metadataJson = File.ReadAllText(metaDataFilePath);
             MetaData metadata = JsonConvert.DeserializeObject<MetaData>(metadataJson) ?? throw new InvalidOperationException("Failed to deserialize metadata.");
 
             byte[] metadataKey;
@@ -69,7 +93,7 @@ namespace app.shared
 
             using (Rfc2898DeriveBytes keyDeriver = new Rfc2898DeriveBytes(secretNameBytes, saltBytes, iterations, HashAlgorithmName.SHA256))
             {
-                metadataKey = keyDeriver.GetBytes(keySize / blocSize); 
+                metadataKey = keyDeriver.GetBytes(keySize / blocSize);
             }
 
             MetaData decryptedMetadata;
@@ -94,12 +118,12 @@ namespace app.shared
                 }
             }
 
-            if (!Enum.TryParse<DeploymentEnvironment>(decryptedMetadata.DeploymentEnvironment, out var decryptedType))
+            if (!Enum.TryParse<HostingEnvironment>(decryptedMetadata.HostingEnvironment, out var decryptedType))
             {
-                throw new InvalidOperationException($"Invalid environment type: {decryptedMetadata.DeploymentEnvironment}");
+                throw new InvalidOperationException($"Invalid environment type: {decryptedMetadata.HostingEnvironment}");
             }
 
-            if (decryptedType == DeploymentEnvironment.Development)
+            if (decryptedType == HostingEnvironment.Development)
             {
                 if (!DateTime.TryParse(decryptedMetadata.ExpirationTimestamp, out DateTime expirationTimestamp))
                 {
@@ -139,7 +163,7 @@ namespace app.shared
             }
 
             return plainText
-                .Split(';')
+                .Split("=;")
                 .Select(item => new
                 {
                     Key = item.Substring(0, item.IndexOf('=')),
