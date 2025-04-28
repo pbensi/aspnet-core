@@ -6,5 +6,6 @@ namespace app.interfaces
     public interface IPersonalDetailService
     {
         Task<PaginatedOffsetResultDto<ViewPersonalDetailDto>> GetViewPersonalDetailAsync(OffsetQueryDto offsetQuery);
+        Task<ResultDto> CreatePersonalDetailForAccountAsync(CreatePersonalDetailDto createPersonal);
     }
 }

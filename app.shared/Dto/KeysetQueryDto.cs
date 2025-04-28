@@ -2,20 +2,8 @@
 {
     public class KeysetQueryDto
     {
-        private string? _PreviousCursor;
-        public string? PreviousCursor
-        {
-            get => SecurityUtils.PublicDecrypt(_PreviousCursor);
-            set => _PreviousCursor = value;
-        }
-
-        private string? _NextCursor;
-        public string? NextCursor
-        {
-            get => SecurityUtils.PublicDecrypt(_NextCursor);
-            set => _NextCursor = value;
-        }
-
+        public string? PreviousCursor { get; set; }
+        public string? NextCursor { get; set; }
         public int PageSize { get; set; }
         public string? SortColumn { get; set; }
         public string? SortDirection { get; set; }

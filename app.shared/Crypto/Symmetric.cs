@@ -1,27 +1,67 @@
 ﻿using System.Security.Cryptography;
 using System.Text;
 
-namespace app.shared.Internal
+namespace app.shared.Securities
 {
-    internal static class AESHelper
+    public static class Symmetric
     {
         private static readonly int _KeySize = 256;
         private static readonly int _BlockSize = 128;
 
-        public enum KeyType
+        public static (string key, string iv) GenerateEnvironmentKeyAndIV(string key, string iv)
         {
-            Public,
-            Private
+            byte[] keyBytes = GetBytesFromString(key, 32);
+            byte[] ivBytes = GetBytesFromString(iv, 16);
+
+            using (Aes aes = Aes.Create())
+            {
+                aes.KeySize = _KeySize;
+                aes.BlockSize = _BlockSize;
+                aes.Key = keyBytes;
+                aes.IV = ivBytes;
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
+
+                using (ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
+                using (MemoryStream msEncrypt = new MemoryStream())
+                using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
+                {
+                    csEncrypt.Write(keyBytes, 0, keyBytes.Length);
+                    csEncrypt.Write(ivBytes, 0, ivBytes.Length);
+                    csEncrypt.FlushFinalBlock();
+
+                    byte[] encryptedData = msEncrypt.ToArray();
+                    string encryptedKey = Convert.ToBase64String(encryptedData.Take(32).ToArray());
+                    string encryptedIv = Convert.ToBase64String(encryptedData.Skip(32).Take(16).ToArray());
+
+                    return (encryptedKey, encryptedIv);
+                }
+            }
         }
 
-        public static string Encrypt(string? data, string? key, string? iv, KeyType keyType)
+        private static byte[] GetBytesFromString(string data, int length)
         {
+            byte[] bytes = Encoding.UTF8.GetBytes(data);
+
+            if (bytes.Length > length)
+            {
+                Array.Resize(ref bytes, length);
+            }
+            else if (bytes.Length < length)
+            {
+                Array.Resize(ref bytes, length);
+            }
+
+            return bytes;
+        }
+
+        public static string Encrypt(string? data, string? key, string? iv)
+        {
+            if (string.IsNullOrWhiteSpace(data))
+                return string.Empty;
             try
             {
-                if (string.IsNullOrWhiteSpace(data))
-                    return string.Empty;
-
-                (byte[] keyByte, byte[] ivByte) = DecodeKeyAndIVStringTobase64(key, iv, keyType);
+                (byte[] keyByte, byte[] ivByte) = DecodeKeyAndIVStringTobase64(key, iv);
                 byte[] dataBytes = Encoding.UTF8.GetBytes(data);
                 byte[] encryptedBytes = EncryptStringToByte(dataBytes, keyByte, ivByte);
                 return Convert.ToBase64String(encryptedBytes);
@@ -32,14 +72,14 @@ namespace app.shared.Internal
             }
         }
 
-        public  static string Decrypt(string? encryptedData, string key, string iv, KeyType keyType)
+        public static string Decrypt(string? encryptedData, string key, string iv)
         {
             if (string.IsNullOrWhiteSpace(encryptedData))
                 return string.Empty;
 
             try
             {
-                (byte[] keyByte, byte[] ivByte) = DecodeKeyAndIVStringTobase64(key, iv, keyType);
+                (byte[] keyByte, byte[] ivByte) = DecodeKeyAndIVStringTobase64(key, iv);
                 byte[] encryptedBytes = Convert.FromBase64String(encryptedData);
                 byte[] decryptedBytes = DecryptStringToByte(encryptedBytes, keyByte, ivByte);
                 return Encoding.UTF8.GetString(decryptedBytes);
@@ -50,7 +90,7 @@ namespace app.shared.Internal
             }
         }
 
-        public static (string Key, string IV) GenerateRandomKeyAndIV(Guid userGuid)
+        public static (string Key, string IV) GenerateRandomKeyAndIV()
         {
             using (Aes aes = Aes.Create())
             {
@@ -58,11 +98,10 @@ namespace app.shared.Internal
                 aes.BlockSize = _BlockSize;
                 aes.GenerateKey();
                 aes.GenerateIV();
+                aes.Mode = CipherMode.CBC;
+                aes.Padding = PaddingMode.PKCS7;
 
-                string keyBase64 = $"{Convert.ToBase64String(aes.Key)}:{userGuid}";
-                string ivBase64 = $"{Convert.ToBase64String(aes.IV)}:{userGuid}";
-
-                return (keyBase64, ivBase64);
+                return (Convert.ToBase64String(aes.Key), Convert.ToBase64String(aes.IV));
             }
         }
 
@@ -72,14 +111,14 @@ namespace app.shared.Internal
 
             try
             {
-                using (Aes aesAlg = Aes.Create())
+                using (Aes aes = Aes.Create())
                 {
-                    aesAlg.Key = key;
-                    aesAlg.IV = iv;
-                    aesAlg.Mode = CipherMode.CBC;
-                    aesAlg.Padding = PaddingMode.PKCS7;
+                    aes.Key = key;
+                    aes.IV = iv;
+                    aes.Mode = CipherMode.CBC;
+                    aes.Padding = PaddingMode.PKCS7;
 
-                    using (ICryptoTransform encryptor = aesAlg.CreateEncryptor(aesAlg.Key, aesAlg.IV))
+                    using (ICryptoTransform encryptor = aes.CreateEncryptor(aes.Key, aes.IV))
                     using (MemoryStream msEncrypt = new MemoryStream())
                     using (CryptoStream csEncrypt = new CryptoStream(msEncrypt, encryptor, CryptoStreamMode.Write))
                     {
@@ -100,14 +139,14 @@ namespace app.shared.Internal
 
             try
             {
-                using (Aes aesAlg = Aes.Create())
+                using (Aes aes = Aes.Create())
                 {
-                    aesAlg.Key = key;
-                    aesAlg.IV = iv;
-                    aesAlg.Mode = CipherMode.CBC;
-                    aesAlg.Padding = PaddingMode.PKCS7;
+                    aes.Key = key;
+                    aes.IV = iv;
+                    aes.Mode = CipherMode.CBC;
+                    aes.Padding = PaddingMode.PKCS7;
 
-                    using (ICryptoTransform decryptor = aesAlg.CreateDecryptor(aesAlg.Key, aesAlg.IV))
+                    using (ICryptoTransform decryptor = aes.CreateDecryptor(aes.Key, aes.IV))
                     using (MemoryStream msDecrypt = new MemoryStream(encryptedData))
                     using (CryptoStream csDecrypt = new CryptoStream(msDecrypt, decryptor, CryptoStreamMode.Read))
                     using (MemoryStream msPlain = new MemoryStream())
@@ -122,40 +161,15 @@ namespace app.shared.Internal
                 throw new CryptographicException($"Decryption failed {ex.Message}");
             }
         }
-        private static (byte[] key, byte[] iv) DecodeKeyAndIVStringTobase64(string? key, string? iv, KeyType keyType)
+        private static (byte[] key, byte[] iv) DecodeKeyAndIVStringTobase64(string? key, string? iv)
         {
             try
             {
                 if (string.IsNullOrWhiteSpace(key) || string.IsNullOrWhiteSpace(iv))
                     throw new InvalidOperationException("Encryption key or IV not set in parameters.");
 
-                string keyBase64 = string.Empty;
-                string ivBase64 = string.Empty;
-
-                switch (keyType)
-                {
-                    case KeyType.Public:
-                        keyBase64 = key;
-                        ivBase64 = iv;
-                        break;
-
-                    case KeyType.Private:
-                        string[] keyParts = key.Split(":");
-                        string[] ivParts = iv.Split(":");
-
-                        if (keyParts.Length < 2 || ivParts.Length < 2)
-                            throw new InvalidOperationException("Split index one not found.");
-
-                        keyBase64 = keyParts[0];
-                        ivBase64 = ivParts[0];
-                        break;
-
-                    default:
-                        throw new ArgumentException("Invalid key type specified.");
-                }
-
-                byte[] keyByte = Convert.FromBase64String(keyBase64);
-                byte[] ivByte = Convert.FromBase64String(ivBase64);
+                byte[] keyByte = Convert.FromBase64String(key);
+                byte[] ivByte = Convert.FromBase64String(iv);
 
                 ValidateKeySize(keyByte, _KeySize / 8, nameof(keyByte));
                 ValidateIVSize(ivByte, _BlockSize / 8, nameof(ivByte));

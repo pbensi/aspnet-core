@@ -6,7 +6,7 @@ using Serilog.Events;
 using Web.Host;
 using Web.Host.Extensions;
 
-Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", EnvironmentManager.HOSTING_ENVIRONMENT);
+Environment.SetEnvironmentVariable("ASPNETCORE_ENVIRONMENT", EnvironmentManager.APP_HOSTING_ENVIRONMENT);
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -43,7 +43,7 @@ builder.Services.AddSession(options =>
     options.Cookie.HttpOnly = true;                          // Prevent client-side access to session cookie
     options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Only send cookies over HTTPS
     options.Cookie.SameSite = SameSiteMode.Strict;           // Mitigate CSRF attacks
-    options.IdleTimeout = TimeSpan.FromSeconds(10);          // Set session timeout to 20 minutes of inactivity
+    options.IdleTimeout = TimeSpan.FromMinutes(10);          // Set session timeout to 20 minutes of inactivity
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInterfaceManager();
@@ -100,7 +100,7 @@ app.UseHttpsRedirection();
 app.UseSession();
 app.UseStaticFiles();
 app.UseRouting();
-app.UseCors(EnvironmentManager.CORS_NAME);
+app.UseCors(EnvironmentManager.APP_CORS_NAME);
 
 app.UseAuthentication();
 app.UseAuthorization();

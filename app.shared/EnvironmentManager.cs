@@ -1,7 +1,9 @@
 ﻿using System.Net;
 using System.Security.Cryptography;
 using System.Text;
+using app.shared.Securities;
 using Newtonsoft.Json;
+using static app.shared.EnumGroup;
 
 namespace app.shared
 {
@@ -14,7 +16,7 @@ namespace app.shared
             public string CipherText { get; set; } = string.Empty;
             public string HostingEnvironment { get; set; } = string.Empty;
             public string ExpirationTimestamp { get; set; } = string.Empty;
-            public string TargetEnvironment { get;set; } = string.Empty;
+            public string TargetEnvironment { get; set; } = string.Empty;
             public string Key { get; set; } = string.Empty;
         }
 
@@ -30,22 +32,27 @@ namespace app.shared
             public string Secret { get; set; } = string.Empty;
         }
 
-        private enum HostingEnvironment
+        private static (string Key, string IV) EnvironmentKeyAndIV
         {
-            Development = 1,
-            Production = 2
+            get
+            {
+                return Symmetric.GenerateEnvironmentKeyAndIV(
+                    GetSecretEnvironmentVariable("APP_PUBLIC_KEY"),
+                    GetSecretEnvironmentVariable("APP_PUBLIC_IV")
+                );
+            }
         }
 
-        public static string PUBLIC_KEY => GetSecretEnvironmentVariable("PUBLIC_KEY");
-        public static string PUBLIC_IV => GetSecretEnvironmentVariable("PUBLIC_IV");
-        public static string SQL_AUTHENTICATION => GetSecretEnvironmentVariable("SQL_AUTHENTICATION");
-        public static string SECRET_KEY => GetSecretEnvironmentVariable("SECRET_KEY");
-        public static string CORS_NAME => GetSecretEnvironmentVariable("CORS_NAME");
-        public static string CORS_ALLOWED_ORIGINS => GetSecretEnvironmentVariable("CORS_ALLOWED_ORIGINS");
-        public static string CORS_SERVER_ORIGINS => GetSecretEnvironmentVariable("CORS_SERVER_ORIGINS");
-        public static string ISSUER => GetSecretEnvironmentVariable("ISSUER");
-        public static string AUDIENCE => GetSecretEnvironmentVariable("AUDIENCE");
-        public static string HOSTING_ENVIRONMENT => GetSecretEnvironmentVariable("HOSTING_ENVIRONMENT");
+        public static string APP_PUBLIC_KEY => EnvironmentKeyAndIV.Key;
+        public static string APP_PUBLIC_IV => EnvironmentKeyAndIV.IV;
+        public static string APP_SQL_AUTHENTICATION => GetSecretEnvironmentVariable("APP_SQL_AUTHENTICATION");
+        public static string APP_SECRET_KEY => GetSecretEnvironmentVariable("APP_SECRET_KEY");
+        public static string APP_CORS_NAME => GetSecretEnvironmentVariable("APP_CORS_NAME");
+        public static string APP_CORS_SERVER_ORIGINS => GetSecretEnvironmentVariable("APP_CORS_SERVER_ORIGINS");
+        public static string APP_CORS_ALLOWED_ORIGINS => GetSecretEnvironmentVariable("APP_CORS_ALLOWED_ORIGINS");
+        public static string APP_ISSUER => GetSecretEnvironmentVariable("APP_ISSUER");
+        public static string APP_AUDIENCE => GetSecretEnvironmentVariable("APP_AUDIENCE");
+        public static string APP_HOSTING_ENVIRONMENT => GetSecretEnvironmentVariable("APP_HOSTING_ENVIRONMENT");
         public static string WEBHOST_FILES => GetEnvironmentVariable("WEBHOST_FILES");
 
         private static string GetEnvironmentVariable(string variable)

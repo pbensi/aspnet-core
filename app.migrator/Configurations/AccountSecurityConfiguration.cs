@@ -13,30 +13,37 @@ namespace app.migrator.Configurations
             builder.Property(p => p.UserGuid)
                 .IsRequired();
 
-            builder.Property(p => p.EncryptedKey)
+            builder.Property(p => p.PublicKey)
                 .HasMaxLength(256)
                 .IsRequired();
 
-            builder.HasIndex(p => p.EncryptedKey)
-                .IsUnique();
-
-            builder.Property(p => p.EncryptedIV)
+            builder.Property(p => p.PublicIV)
                 .HasMaxLength(256)
                 .IsRequired();
 
-            builder.HasIndex(p => p.EncryptedIV)
-                .IsUnique();
+            builder.Property(p => p.PrivateKey)
+               .HasMaxLength(256)
+               .IsRequired();
 
-            builder.Property(p => p.Ipv4)
+            builder.Property(p => p.PrivateIV)
+                .HasMaxLength(256)
+                .IsRequired();
+
+            builder.Property(p => p.DeviceName)
+                .HasMaxLength(255)
+                .IsRequired(false);
+
+            builder.Property(p => p.Ipv4Address)
                 .HasMaxLength(45)
-                .IsRequired();
+                .IsRequired(false);
 
-            builder.Property(p => p.Ipv6)
+            builder.Property(p => p.Ipv6Address)
                 .HasMaxLength(45)
-                .IsRequired();
+                .IsRequired(false);
 
-            builder.Property(p => p.OS)
-                .IsRequired();
+            builder.Property(p => p.OperatingSystem)
+                .HasMaxLength(100)
+                .IsRequired(false);
 
             builder.HasOne(p => p.Account)
                 .WithOne(p => p.AccountSecurity)

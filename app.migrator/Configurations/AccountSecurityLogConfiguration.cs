@@ -16,24 +16,37 @@ namespace app.migrator.Configurations
             builder.Property(p => p.UserGuid)
                 .IsRequired();
 
-            builder.Property(p => p.OldEncryptedKey)
+            builder.Property(p => p.OldPublicKey)
                 .HasMaxLength(256)
                 .IsRequired();
 
-            builder.Property(p => p.OldEncryptedIV)
+            builder.Property(p => p.OldPublicIV)
                 .HasMaxLength(256)
                 .IsRequired();
 
-            builder.Property(p => p.Ipv4)
-                .HasMaxLength(45)
+            builder.Property(p => p.OldPrivateKey)
+               .HasMaxLength(256)
+               .IsRequired();
+
+            builder.Property(p => p.OldPrivateIV)
+                .HasMaxLength(256)
                 .IsRequired();
 
-            builder.Property(p => p.Ipv6)
-                .HasMaxLength(45)
-                .IsRequired();
+            builder.Property(p => p.DeviceName)
+                .HasMaxLength(255)
+                .IsRequired(false);
 
-            builder.Property(p => p.OS)
-                .IsRequired();
+            builder.Property(p => p.Ipv4Address)
+                .HasMaxLength(45)
+                .IsRequired(false);
+
+            builder.Property(p => p.Ipv6Address)
+                .HasMaxLength(45)
+                .IsRequired(false);
+
+            builder.Property(p => p.OperatingSystem)
+                .HasMaxLength(100)
+                .IsRequired(false);
         }
     }
 }

@@ -17,8 +17,8 @@ namespace Web.Host.Middlewares
         public async Task InvokeAsync(HttpContext httpContext,
             RequestContext requestContext)
         {
-            var corsAllowedOrigins = EnvironmentManager.CORS_ALLOWED_ORIGINS?.Split(',') ?? Array.Empty<string>();
-            var corsServerOrigins = EnvironmentManager.CORS_SERVER_ORIGINS?.Split(',') ?? Array.Empty<string>();
+            var corsAllowedOrigins = EnvironmentManager.APP_CORS_ALLOWED_ORIGINS?.Split(',') ?? Array.Empty<string>();
+            var corsServerOrigins = EnvironmentManager.APP_CORS_SERVER_ORIGINS?.Split(',') ?? Array.Empty<string>();
 
             string originRequest = RequestManager.GetRequestHeader(httpContext, RequestNames.Origin);
 

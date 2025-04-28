@@ -1,6 +1,6 @@
 ﻿namespace app.shared
 {
-    public class Enums
+    public class EnumGroup
     {
         public enum RequestMethod
         {
@@ -19,6 +19,12 @@
             Success = 2,
             Warning = 3,
             Error = 4,
+        }
+
+        public enum HostingEnvironment
+        {
+            Development = 1,
+            Production = 2
         }
     }
 }

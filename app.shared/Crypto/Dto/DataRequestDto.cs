@@ -1,6 +1,6 @@
-﻿namespace app.shared.Dto
+﻿namespace app.shared.Crypto.Dto
 {
-    public class SecureDataRequest
+    public class DataRequestDto
     {
         public int[] Ciphertext { get; set; }
         public int[] Iv { get; set; }

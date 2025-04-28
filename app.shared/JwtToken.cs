@@ -13,9 +13,9 @@ namespace app.shared
             {
                 var jwtTokenConfig = new
                 {
-                    SecretKey = EnvironmentManager.SECRET_KEY,
-                    Issuer = EnvironmentManager.ISSUER,
-                    Audience = EnvironmentManager.AUDIENCE,
+                    SecretKey = EnvironmentManager.APP_SECRET_KEY,
+                    Issuer = EnvironmentManager.APP_ISSUER,
+                    Audience = EnvironmentManager.APP_AUDIENCE,
                     Claims = claims,
                     ExpireDate = DateTime.UtcNow.AddSeconds(15)
                 };
@@ -45,9 +45,9 @@ namespace app.shared
             {
                 var jwtTokenConfig = new
                 {
-                    SecretKey = EnvironmentManager.SECRET_KEY,
-                    Issuer = EnvironmentManager.ISSUER,
-                    Audience = EnvironmentManager.AUDIENCE
+                    SecretKey = EnvironmentManager.APP_SECRET_KEY,
+                    Issuer = EnvironmentManager.APP_ISSUER,
+                    Audience = EnvironmentManager.APP_AUDIENCE
                 };
 
                 var tokenHandler = new JwtSecurityTokenHandler();

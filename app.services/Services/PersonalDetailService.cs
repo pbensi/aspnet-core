@@ -1,17 +1,24 @@
 ﻿using app.entities;
 using app.interfaces;
+using app.migrator;
 using app.repositories;
-using app.shared.Dto;
-using app.shared.Dto.PersonalDetail;
-using AutoMapper;
 using app.repositories.Extensions;
+using app.services.Authorizations;
+using app.shared.Dto;
+using app.shared.Dto.Account;
+using app.shared.Dto.PersonalDetail;
+using app.shared.Securities;
+using AutoMapper;
 using Microsoft.EntityFrameworkCore;
+using static app.shared.EnumGroup;
 
 namespace app.services.Services
 {
     internal sealed class PersonalDetailService : IPersonalDetailService
     {
         private readonly IRepository<PersonalDetail> _personalDetail;
+        private readonly IRepository<AccountSecurityLog> _accountSecurityLog;
+        private readonly IUnitOfWork _unitOfWork;
         private readonly IMapper _mapper;
 
         public PersonalDetailService(
@@ -19,6 +26,8 @@ namespace app.services.Services
             IMapper mapper)
         {
             _personalDetail = repositoryManager.Entity<PersonalDetail>();
+            _accountSecurityLog = repositoryManager.Entity<AccountSecurityLog>();
+            _unitOfWork = repositoryManager.UnitOfWork;
             _mapper = mapper;
         }
 
@@ -65,6 +74,81 @@ namespace app.services.Services
             catch (Exception e)
             {
                 throw new InvalidOperationException(e.Message);
+            }
+        }
+
+        public async Task<ResultDto> CreatePersonalDetailForAccountAsync(CreatePersonalDetailDto createPersonal)
+        {
+            try
+            {
+                var existingUser = await _personalDetail
+                    .FirstOrDefaultAsync(p => p.Account.UserName == createPersonal.UserName);
+
+                if (existingUser != null)
+                {
+                    return new ResultDto
+                    {
+                        IsSuccess = false,
+                        Message = "UserName Already Exists",
+                        Type = MessageType.Warning
+                    };
+                }
+
+                List<AccountRoleDto> accountRole =  await AccountRolePermission.RolesAsync(new List<AccountRoleDto>(), _mapper);
+
+                var accountRoles = _mapper.Map<List<AccountRole>>(accountRole);
+                var personal = _mapper.Map<PersonalDetail>(createPersonal);
+
+                Guid userGuid = Guid.NewGuid();
+
+                (string publicKey, string publicIV) = Symmetric.GenerateRandomKeyAndIV();
+                (string privateKey, string privateIV) = Symmetric.GenerateRandomKeyAndIV();
+
+                personal.UserGuid = userGuid;
+                personal.Account.IsAdmin = false;
+                personal.Account.IsActive = true;
+                personal.Account.Password = Hashing.Hashed(createPersonal.Password);
+                personal.Account.AccountRole = accountRoles;
+                personal.Account.AccountSecurity = new AccountSecurity
+                {
+                    PublicIV = publicKey,
+                    PublicKey = publicIV,
+                    PrivateKey = privateKey,
+                    PrivateIV = privateIV,
+                    DeviceName = NetworkProvider.DeviceName(),
+                    Ipv4Address = NetworkProvider.Ipv4Address(),
+                    Ipv6Address = NetworkProvider.Ipv6Address(),
+                    OperatingSystem = NetworkProvider.OperatingSystem()
+                };
+
+                var newLogEntry = new AccountSecurityLog
+                {
+                    UserGuid = userGuid,
+                    OldPublicIV = publicKey,
+                    OldPublicKey = publicIV,
+                    OldPrivateKey = privateKey,
+                    OldPrivateIV = privateIV,
+                    DeviceName = NetworkProvider.DeviceName(),
+                    Ipv4Address = NetworkProvider.Ipv4Address(),
+                    Ipv6Address = NetworkProvider.Ipv6Address(),
+                    OperatingSystem = NetworkProvider.OperatingSystem()
+                };
+
+                _personalDetail.Add(personal);
+                _accountSecurityLog.Add(newLogEntry);
+
+                bool isSavedSuccessfully = await _unitOfWork.SaveChangesAsync();
+
+                return new ResultDto
+                {
+                    IsSuccess = isSavedSuccessfully,
+                    Message = isSavedSuccessfully ? "Created successfully." : "Failed to create user.",
+                    Type = isSavedSuccessfully ? MessageType.Success : MessageType.Error
+                };
+            }
+            catch (Exception e)
+            {
+                throw new Exception("An error occurred while creating the user.", e);
             }
         }
     }

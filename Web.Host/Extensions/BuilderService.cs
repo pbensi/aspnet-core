@@ -43,8 +43,8 @@ namespace Web.Host.Extensions
 
         public static void AddCorsOrigins(this IServiceCollection services)
         {
-            var corsName = EnvironmentManager.CORS_NAME;
-            var corsClientAllowedOrigins = EnvironmentManager.CORS_ALLOWED_ORIGINS?.Split(',') ?? Array.Empty<string>();
+            var corsName = EnvironmentManager.APP_CORS_NAME;
+            var corsClientAllowedOrigins = EnvironmentManager.APP_CORS_ALLOWED_ORIGINS?.Split(',') ?? Array.Empty<string>();
 
             services.AddCors(options =>
             {
@@ -73,9 +73,9 @@ namespace Web.Host.Extensions
                     ValidateLifetime = false,
                     ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = EnvironmentManager.ISSUER,
-                    ValidAudience = EnvironmentManager.AUDIENCE,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(EnvironmentManager.SECRET_KEY))
+                    ValidIssuer = EnvironmentManager.APP_ISSUER,
+                    ValidAudience = EnvironmentManager.APP_AUDIENCE,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(EnvironmentManager.APP_SECRET_KEY))
                 };
             });
 
@@ -132,7 +132,7 @@ namespace Web.Host.Extensions
 
         public static void AddConnectionAndHealthChecks(this IServiceCollection services)
         {
-            string sql = EnvironmentManager.SQL_AUTHENTICATION;
+            string sql = EnvironmentManager.APP_SQL_AUTHENTICATION;
             services.AddHealthChecks()
                 .AddCheck("database", new SQLHealthCheck(sql));
 

@@ -1,10 +1,10 @@
-﻿using app.interfaces;
+﻿using System.Diagnostics;
+using app.interfaces;
 using app.services.Authorizations;
-using app.shared;
-using app.shared.Dto;
+using app.shared.Crypto.Dto;
 using app.shared.Dto.Account;
+using app.shared.Securities;
 using Microsoft.AspNetCore.Mvc;
-using System.Diagnostics;
 using Web.Host.HttpContexts;
 using Web.Host.Models;
 
@@ -27,9 +27,9 @@ namespace Web.Host.Controllers
             return View();
         }
 
-        public async Task<ResponseModel> SwaggerSignIn([FromBody] SecureDataRequest request)
+        public async Task<ResponseModel> SwaggerSignIn([FromBody] DataRequestDto request)
         {
-            var response = SecurityUtils.ProcessSecureData<SwaggerSignInModel>(request);
+            var response = Asymmetric.ProcessSecureData<SwaggerSignInModel>(request);
 
             if (string.IsNullOrEmpty(response.UserName) || string.IsNullOrEmpty(response.Password))
             {
@@ -69,16 +69,8 @@ namespace Web.Host.Controllers
                     return adminAccount;
                 }
 
-                //var claims = new[]
-                // {
-                //    new Claim(ClaimTypes.NameIdentifier, account.UserGuid.ToString()),
-                //    new Claim(ClaimTypes.Webpage, PageNames.Pages_Swagger)
-                //};
-
-                //string token = JwtToken.GenerateJwtToken(claims);
-
                 SessionManager.SetSessionString(HttpContext, SessionNames.Account, account.UserGuid.ToString());
-                SessionManager.SetSessionString(HttpContext, SessionNames.Page, PageNames.Pages_Swagger);
+                SessionManager.SetSessionString(HttpContext, SessionNames.Page, PageName.Pages_Swagger);
 
                 return new ResponseModel
                 {

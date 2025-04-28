@@ -1,13 +1,13 @@
-﻿using app.shared.Dto;
-using Newtonsoft.Json;
-using System.Security.Cryptography;
+﻿using System.Security.Cryptography;
 using System.Text;
+using app.shared.Crypto.Dto;
+using Newtonsoft.Json;
 
-namespace app.shared.Internal
+namespace app.shared.Securities
 {
-    internal static class AESGCMandECDSAHelper
+    public class Asymmetric
     {
-        public static T ProcessSecureData<T>(SecureDataRequest request)
+        public static T ProcessSecureData<T>(DataRequestDto request)
         {
             byte[] ciphertext = request.Ciphertext.Select(b => (byte)b).ToArray();
             byte[] iv = request.Iv.Select(b => (byte)b).ToArray();
@@ -24,7 +24,6 @@ namespace app.shared.Internal
             }
 
             int tagSize = 16;
-
             Span<byte> tag = new byte[tagSize];
             ciphertext.AsSpan(ciphertext.Length - tagSize).CopyTo(tag);
 

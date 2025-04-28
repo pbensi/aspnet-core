@@ -4,17 +4,18 @@ using app.migrator;
 using app.migrator.Contexts;
 using app.repositories;
 using app.services.Authorizations;
-using app.shared;
 using app.shared.Dto.Account;
+using app.shared.Securities;
 using AutoMapper;
 using Microsoft.EntityFrameworkCore;
-using static app.shared.Enums;
+using static app.shared.EnumGroup;
 
 namespace app.services.Services
 {
     internal sealed class AccountService : IAccountService
     {
         private readonly IRepository<Account> _account;
+        private readonly IRepository<AccountRole> _accountRole;
         private readonly IRepository<OpenResourcePath> _openResourcePath;
         private readonly IUnitOfWork _unitOfWork;
         private readonly RequestContext _requestContext;
@@ -25,6 +26,7 @@ namespace app.services.Services
             IMapper mapper)
         {
             _account = repositoryManager.Entity<Account>();
+            _accountRole = repositoryManager.Entity<AccountRole>();
             _openResourcePath = repositoryManager.Entity<OpenResourcePath>();
             _unitOfWork = repositoryManager.UnitOfWork;
             _requestContext = requestContext;
@@ -44,7 +46,7 @@ namespace app.services.Services
                 return (null, "Invalid user name or password. Please try again.");
             }
 
-            bool isPasswordValid = SecurityUtils.VerifyHashed(account.Password, signIn.Password);
+            bool isPasswordValid = Hashing.Verify(account.Password, signIn.Password);
             if (!isPasswordValid)
             {
                 return (null, "Invalid user name or password. Please try again.");
@@ -60,9 +62,10 @@ namespace app.services.Services
                 return (null, $"The user has been inactive since {account.LastModifiedAt}. Please contact your administrator for assistance.");
             }
 
-            account.AccountSecurity.OS = NetworkProvider.GetOperatingSystem();
-            account.AccountSecurity.Ipv4 = NetworkProvider.GetIpV4();
-            account.AccountSecurity.Ipv6 = NetworkProvider.GetIpV6();
+            account.AccountSecurity.DeviceName = NetworkProvider.DeviceName();
+            account.AccountSecurity.Ipv4Address = NetworkProvider.Ipv4Address();
+            account.AccountSecurity.Ipv6Address = NetworkProvider.Ipv6Address();
+            account.AccountSecurity.OperatingSystem = NetworkProvider.OperatingSystem();
 
             _requestContext.UserGuid = account.UserGuid;
 
@@ -82,9 +85,10 @@ namespace app.services.Services
             return _mapper.Map<AccountDto>(account);
         }
 
-        public async Task<PermissionCheckDto> CheckAccountPermissionAsync(string pageName, string requestMethod, string requestPath, string allowedRole, Guid userGuid)
+        public async Task<PermissionCheckDto> CheckAccountPermissionAsync(string pageName, string requestMethod, string requestPath, string allowedRole)
         {
             bool hasPermission = false;
+            Guid userGuid = _requestContext.UserGuid;
 
             if (userGuid != Guid.Empty)
             {
@@ -121,7 +125,7 @@ namespace app.services.Services
                     };
                 }
 
-                if (!account.IsAdmin && pageName == PageNames.Pages_Swagger)
+                if (!account.IsAdmin && pageName == PageName.Pages_Swagger)
                 {
                     return new PermissionCheckDto
                     {
@@ -162,7 +166,8 @@ namespace app.services.Services
                     };
                 }
 
-                if (resourcePath.RequestMethod != requestMethod)
+                var resourceMethod = await _openResourcePath.FirstOrDefaultAsync(p => p.RequestPath == requestPath && p.AllowedRole == allowedRole && p.RequestMethod == requestMethod);
+                if (resourceMethod == null)
                 {
                     return new PermissionCheckDto
                     {
@@ -179,6 +184,27 @@ namespace app.services.Services
                 HasPermission = hasPermission,
                 Message = "Permission granted"
             };
+        }
+
+        public async Task<List<AccountRoleDto>> CheckPermissionPageNamesAsync(List<string> pageName)
+        {
+            try
+            {
+                if (pageName == null || !pageName.Any())
+                {
+                    return new List<AccountRoleDto>();
+                }
+
+                var user = await _accountRole
+                    .Where(p => p.UserGuid == _requestContext.UserGuid && pageName.Any(name => p.PageName == name) && p.IsGet)
+                    .ToListAsync();
+
+                return _mapper.Map<List<AccountRoleDto>>(user);
+            }
+            catch (Exception e)
+            {
+                throw new Exception("An error occurred while getting permission page name.", e);
+            }
         }
     }
 }

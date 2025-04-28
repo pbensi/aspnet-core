@@ -6,6 +6,7 @@ namespace app.interfaces
     {
         Task<(AccountDto? account, string message)> SignInAccountAsync(SignInDto signIn);
         Task<AccountDto> GetAccountAsync(Guid userGuid);
-        Task<PermissionCheckDto> CheckAccountPermissionAsync(string pageName, string requestMethod, string requestPath, string allowedRole, Guid userGuid);
+        Task<PermissionCheckDto> CheckAccountPermissionAsync(string pageName, string requestMethod, string requestPath = "", string allowedRole = "None");
+        Task<List<AccountRoleDto>> CheckPermissionPageNamesAsync(List<string> pageName);
     }
 }

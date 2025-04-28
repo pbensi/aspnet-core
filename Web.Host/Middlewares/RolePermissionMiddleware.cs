@@ -21,8 +21,7 @@ namespace Web.Host.Middlewares
             var result = await accountService.Service.CheckAccountPermissionAsync(requestContext.PageName,
                 httpContext.Request.Method,
                 httpContext.Request.Path,
-                requestContext.AllowedRole.ToString(),
-                requestContext.UserGuid);
+                requestContext.AllowedRole.ToString());
 
             if (result.HasPermission == false)
             {

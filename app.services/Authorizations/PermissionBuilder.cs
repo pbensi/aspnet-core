@@ -2,21 +2,21 @@
 {
     internal static class PermissionBuilder
     {
-        public static async Task<List<Permissions>> GetPermissionsAsync()
+        public static async Task<List<Permission>> GetPermissionsAsync()
         {
-            var rootPermission = new Permissions("root", "root");
+            var rootPermission = new Permission("root", "root");
 
-            var users = rootPermission.AddChild(PageNames.Pages_Users, "Users", true);
-            var swagger = rootPermission.AddChild(PageNames.Pages_Swagger, "Swagger", true);
+            var users = rootPermission.AddChild(PageName.Pages_Users, "Users", true);
+            var swagger = rootPermission.AddChild(PageName.Pages_Swagger, "Swagger", true);
 
             var children = rootPermission.Children.SelectMany(FlattenPermissions).ToList();
 
             return await Task.FromResult(children);
         }
 
-        private static List<Permissions> FlattenPermissions(Permissions parent)
+        private static List<Permission> FlattenPermissions(Permission parent)
         {
-            var permissions = new List<Permissions> { parent };
+            var permissions = new List<Permission> { parent };
 
             foreach (var child in parent.Children)
             {

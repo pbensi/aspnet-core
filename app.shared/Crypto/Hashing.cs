@@ -1,14 +1,14 @@
 ﻿using System.Security.Cryptography;
 
-namespace app.shared.Internal
+namespace app.shared.Securities
 {
-    internal static class HashingHelper
+    public static class Hashing
     {
         private const int SaltSize = 32;
         private const int Iterations = 100000;
         private const int HashSize = 64;
 
-        public static string Hash(string data)
+        public static string Hashed(string data)
         {
             byte[] dataBytes = System.Text.Encoding.UTF8.GetBytes(data);
 
@@ -18,7 +18,7 @@ namespace app.shared.Internal
             string hashedString = $"{Convert.ToBase64String(salt)}:{Iterations}:{Convert.ToBase64String(hash)}";
             return hashedString;
         }
-        public static bool VerifyHashed(string hashedData, string originalData)
+        public static bool Verify(string hashedData, string originalData)
         {
             string[] parts = hashedData.Split(':');
             if (parts.Length != 3)

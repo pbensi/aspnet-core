@@ -1,6 +1,4 @@
-﻿using static app.shared.Enums;
-
-namespace app.shared.Dto.Account
+﻿namespace app.shared.Dto.Account
 {
     public class PermissionCheckDto
     {

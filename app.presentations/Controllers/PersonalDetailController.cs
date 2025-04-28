@@ -1,6 +1,8 @@
 ﻿using app.interfaces;
+using app.shared.Crypto.Dto;
 using app.shared.Dto;
 using app.shared.Dto.PersonalDetail;
+using app.shared.Securities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Logging;
@@ -29,6 +31,22 @@ namespace app.presentations.Controllers
             try
             {
                 return await _personalDetail.Service.GetViewPersonalDetailAsync(offsetQuery);
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex.Message);
+                throw;
+            }
+        }
+
+        [HttpPost("CreatePersonalDetailForAccountAsync")]
+        [AllowAnonymous]
+        public async Task<ResultDto> CreatePersonalDetailForAccountAsync([FromQuery] DataRequestDto request)
+        {
+            try
+            {
+                var data = Asymmetric.ProcessSecureData<CreatePersonalDetailDto>(request);
+                return await _personalDetail.Service.CreatePersonalDetailForAccountAsync(data);
             }
             catch (Exception ex)
             {

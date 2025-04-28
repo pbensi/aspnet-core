@@ -5,7 +5,7 @@ namespace app.migrator
 {
     public static class NetworkProvider
     {
-        public static string GetIpV4()
+        public static string Ipv4Address()
         {
             string ipV4 = string.Empty;
 
@@ -29,7 +29,7 @@ namespace app.migrator
             return ipV4;
         }
 
-        public static string GetIpV6()
+        public static string Ipv6Address()
         {
             string ipV6 = string.Empty;
 
@@ -53,7 +53,12 @@ namespace app.migrator
             return ipV6;
         }
 
-        public static string GetOperatingSystem()
+        public static string DeviceName()
+        {
+            return Environment.MachineName;
+        }
+
+        public static string OperatingSystem()
         {
             return $"{Environment.OSVersion.Platform} {Environment.OSVersion.Version}";
         }
