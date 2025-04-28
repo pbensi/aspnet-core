@@ -1,4 +1,5 @@
-﻿using app.interfaces;
+﻿using System.Text;
+using app.interfaces;
 using app.migrator.Contexts;
 using app.presentations;
 using app.repositories;
@@ -11,7 +12,6 @@ using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
 using NetEscapades.AspNetCore.SecurityHeaders;
 using Swashbuckle.AspNetCore.SwaggerUI;
-using System.Text;
 
 namespace Web.Host.Extensions
 {
@@ -59,6 +59,10 @@ namespace Web.Host.Extensions
 
         public static void AddJwtAuthentication(this IServiceCollection services)
         {
+            string secret = EnvironmentManager.APP_SECRET_KEY;
+            string issuer = EnvironmentManager.APP_ISSUER;
+            string audience = EnvironmentManager.APP_AUDIENCE;
+
             services.AddAuthentication(options =>
             {
                 options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
@@ -73,9 +77,9 @@ namespace Web.Host.Extensions
                     ValidateLifetime = false,
                     ValidateIssuerSigningKey = true,
 
-                    ValidIssuer = EnvironmentManager.APP_ISSUER,
-                    ValidAudience = EnvironmentManager.APP_AUDIENCE,
-                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(EnvironmentManager.APP_SECRET_KEY))
+                    ValidIssuer = issuer,
+                    ValidAudience = audience,
+                    IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(secret))
                 };
             });
 

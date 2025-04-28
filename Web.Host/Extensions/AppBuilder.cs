@@ -1,4 +1,5 @@
-﻿using Web.Host.Middlewares;
+﻿using app.services.SignalR;
+using Web.Host.Middlewares;
 
 namespace Web.Host.Extensions
 {
@@ -25,14 +26,14 @@ namespace Web.Host.Extensions
             return builder.UseMiddleware<RequestContextMiddleware>();
         }
 
-        //public static IApplicationBuilder UseSignalRHub(this IApplicationBuilder builder)
-        //{
-        //    builder.UseEndpoints(endpoints =>
-        //    {
-        //        endpoints.MapHub<SignalRHub>(UrlResources.SignalRHubUrl);
-        //    });
+        public static IApplicationBuilder UseSignalRHub(this IApplicationBuilder builder)
+        {
+            builder.UseEndpoints(endpoints =>
+            {
+                endpoints.MapHub<SignalRHub>(UrlResources.SignalRHubUrl);
+            });
 
-        //    return builder;
-        //}
+            return builder;
+        }
     }
 }

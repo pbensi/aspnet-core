@@ -1,6 +1,8 @@
 using app.presentations;
 using app.services;
+using app.services.SignalR;
 using app.shared;
+using Microsoft.AspNetCore.SignalR;
 using Serilog;
 using Serilog.Events;
 using Web.Host;
@@ -52,8 +54,8 @@ builder.Services.AddAutoMapper(typeof(MappingProfile).Assembly);
 builder.Services.AddCorsOrigins();
 builder.Services.AddJwtAuthentication();
 builder.Services.AddPresentationSwaggerGen();
-//builder.Services.AddSingleton<IUserIdProvider, SignalRProvider>();
-//builder.Services.AddSignalR();
+builder.Services.AddSingleton<IUserIdProvider, SignalRProvider>();
+builder.Services.AddSignalR();
 
 var app = builder.Build();
 
@@ -109,6 +111,7 @@ app.UseRequestContext();
 app.UseRequestThrottling();
 app.UseSwaggerAuthentication();
 app.UseRolePermission();
+app.UseSignalRHub();
 
 app.UseSwagger();
 app.UseSwaggerUI(c =>

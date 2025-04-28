@@ -4,7 +4,7 @@
     {
         public const string RootUrl = "/";
         public const string HomeUrl = "/Home";
-        public const string SwaggerUrl = "/swagger";
+        public const string SwaggerUrl = "/swagger/index.html";
         public const string APIUrl = "/api";
         public const string HomeErrorUrl = "/Home/Error";
         public const string SignalRHubUrl = "/signalRHub";
