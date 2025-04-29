@@ -44,10 +44,10 @@ builder.Services.AddSwaggerUINonceSupport();
 builder.Services.AddDistributedMemoryCache();
 builder.Services.AddSession(options =>
 {
-    options.Cookie.HttpOnly = true;                          // Prevent client-side access to session cookie
-    options.Cookie.SecurePolicy = CookieSecurePolicy.Always; // Only send cookies over HTTPS
-    options.Cookie.SameSite = SameSiteMode.Strict;           // Mitigate CSRF attacks
-    options.IdleTimeout = TimeSpan.FromMinutes(10);          // Set session timeout to 20 minutes of inactivity
+    options.Cookie.HttpOnly = true;
+    options.Cookie.SecurePolicy = CookieSecurePolicy.Always;
+    options.Cookie.SameSite = SameSiteMode.Strict;
+    options.IdleTimeout = TimeSpan.FromMinutes(10);
 });
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddInterfaceManager();
@@ -63,11 +63,9 @@ var app = builder.Build();
 
 app.UseSqlServerHealthCheck();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 else
