@@ -1,4 +1,5 @@
-﻿using System.Text;
+﻿using System.Reflection;
+using System.Text;
 using app.interfaces;
 using app.migrator.Contexts;
 using app.presentations;
@@ -131,6 +132,9 @@ namespace Web.Host.Extensions
                 };
 
                 option.AddSecurityRequirement(securityRequirement);
+
+                var xmlFilename = $"{Assembly.GetExecutingAssembly().GetName().Name}.xml";
+                option.IncludeXmlComments(Path.Combine(AppContext.BaseDirectory, xmlFilename));
             });
         }
 
